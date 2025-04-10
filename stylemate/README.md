@@ -122,4 +122,14 @@
   -Update Home.jsx to use this component
   -add the UploadForm component just above the wardrobe section (ClothesGallery) so users can upload clothes directly to their wardrobe.
 
-###  implement auto outfit generation based on your uploaded wardrobe
+### auto outfit generation based on your uploaded wardrobe
+ From the wardrobe (data from MongoDB), randomly select:
+ --1 Top
+ --1 Bottom
+ --(Optional) 1 Layer (like jacket) if available
+
+ Update Home.jsx to:
+ --Fetch clothes after upload or mount.
+ --Filter them by type.
+ --Randomly generate a suggestion.
+ 
