@@ -115,4 +115,11 @@
 ## Connect Frontend UploadForm to Backend
   We'll send the Cloudinary image URL, type, and color from the form.   
 
+### Fetch and Display Clothes (Outfit Dashboard)
+  We’ll create a new component (e.g., ClothesGallery.jsx) that:
+  -Fetches the clothes from  backend (GET /api/clothes)
+  -Displays the images along with their type and color
+  -Update Home.jsx to use this component
+  -add the UploadForm component just above the wardrobe section (ClothesGallery) so users can upload clothes directly to their wardrobe.
 
+###  implement auto outfit generation based on your uploaded wardrobe
