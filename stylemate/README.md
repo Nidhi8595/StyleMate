@@ -133,3 +133,4 @@
  --Filter them by type.
  --Randomly generate a suggestion.
  
+### Use OpenAI to suggest outfits
