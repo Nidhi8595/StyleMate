@@ -7,19 +7,25 @@ const clothSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['top', 'bottom', 'layer'],
+    enum: ['top', 'bottom', 'layer', 'shoes', 'accessory'],
     required: true
   },
   color: {
     type: String,
     required: true
   },
-  uploadedAt: {
-    type: Date,
-    default: Date.now
+  season: {
+    type: String,
+    enum: ['summer', 'winter', 'all'],
+    default: 'all'
+  },
+  occasion: {
+    type: String,
+    enum: ['casual', 'formal', 'party', 'sports', 'ethnic'],
+    default: 'casual'
   }
 });
 
 const Cloth = mongoose.model('Cloth', clothSchema);
 
-export default Cloth;
+export default Cloth;  

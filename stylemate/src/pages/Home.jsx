@@ -9,6 +9,23 @@ const Home = () => {
   const [clothes, setClothes] = useState([]);
   const [outfitSuggestion, setOutfitSuggestion] = useState('');
   const [refresh, setRefresh] = useState(false);
+  const [suggesting, setSuggesting] = useState(false);
+  const [error, setError] = useState(null); // Error state
+
+  const getWeatherIcon = (condition) => {
+    switch (condition) {
+      case 'Clear':
+        return '☀️';
+      case 'Clouds':
+        return '☁️';
+      case 'Rain':
+        return '🌧️';
+      case 'Snow':
+        return '❄️';
+      default:
+        return '🌈';
+    }
+  };
 
   const getWeather = async (city) => {
     try {
@@ -20,12 +37,14 @@ const Home = () => {
       const weatherInfo = {
         city: data.name,
         temperature: data.main.temp,
-        condition: data.weather[0].main
+        condition: data.weather[0].main,
       };
 
       setWeather(weatherInfo);
+      setError(null); // Clear any previous errors
     } catch (error) {
-      console.error("Failed to fetch weather:", error);
+      console.error('Failed to fetch weather:', error);
+      setError('Unable to fetch weather data. Please try again later.');
     }
   };
 
@@ -33,26 +52,33 @@ const Home = () => {
     try {
       const res = await axios.get('http://localhost:5000/api/clothes');
       setClothes(res.data);
+      setError(null); // Clear any previous errors
     } catch (err) {
-      console.error("Failed to fetch clothes:", err);
+      console.error('Failed to fetch clothes:', err);
+      setError('Unable to fetch clothes data. Please try again later.');
     }
   };
 
   const fetchAISuggestion = async (weatherData, clothesData) => {
     try {
+      setSuggesting(true);
       const res = await axios.post('http://localhost:5000/api/ai-outfit', {
         weather: weatherData,
-        clothes: clothesData
+        clothes: clothesData,
       });
       setOutfitSuggestion(res.data.suggestion);
+      setError(null); // Clear any previous errors
     } catch (err) {
-      console.error("Failed to fetch AI outfit:", err);
+      console.error('Failed to fetch AI outfit:', err);
+      setError('Unable to fetch outfit suggestion. Please try again later.');
+    } finally {
+      setSuggesting(false);
     }
   };
 
   const fetchAll = async () => {
     setLoading(true);
-    await getWeather('Delhi');
+    await getWeather('Noida'); // Hardcoded city for now
     await fetchClothes();
     setLoading(false);
   };
@@ -68,33 +94,85 @@ const Home = () => {
   }, [weather, clothes]);
 
   const handleUpload = () => {
-    setRefresh((prev) => !prev); // trigger reload
+    setRefresh((prev) => !prev); // Trigger reload
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold text-blue-800">Good Morning! 🌞</h1>
+    <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        
+        <h1 className="text-3xl font-semibold text-gray-800">StyleMate </h1>
+        
+        <div
+          className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-sm text-white"
+          aria-label="User Profile"
+        >
+          👤
+        </div>
+      </div>
 
+      {/* Weather & Suggestion */}
       {loading ? (
-        <p>Loading weather and wardrobe...</p>
+        <div className="text-center text-gray-500">
+          <div className="loader border-t-4 border-blue-500 rounded-full w-8 h-8 mx-auto animate-spin"></div>
+          Loading weather and wardrobe...
+        </div>
+      ) : error ? (
+        <div className="text-center text-red-500">{error}</div>
       ) : (
         <>
-          <div className="bg-blue-100 p-4 rounded-xl shadow">
-            <h2 className="text-xl font-semibold mb-2">Weather in {weather.city}</h2>
-            <p>🌡️ {weather.temperature}°C – {weather.condition}</p>
+          {/* Weather Info */}
+          <div className="bg-blue-50 p-4 rounded-xl shadow-md flex items-center gap-4">
+            <span className="text-2xl">{getWeatherIcon(weather.condition)}</span>
+            <div>
+              <h2 className="text-lg font-medium text-gray-700">
+                {weather.city}'s Weather
+              </h2>
+              <p className="text-sm text-gray-600">
+                {weather.temperature}°C – {weather.condition}
+              </p>
+            </div>
           </div>
 
+          {/* Suggest Button */}
+          <button
+            onClick={() => fetchAISuggestion(weather, clothes)}
+            disabled={suggesting}
+            className={`py-2 px-4 rounded transition mt-4 ${
+              suggesting
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
+            }`}
+            aria-label="Get Outfit Suggestion"
+          >
+            {suggesting ? 'Suggesting Outfit...' : 'Get Today’s Outfit Suggestion'}
+          </button>
+
+          {/* AI Outfit Suggestion */}
           {outfitSuggestion && (
-            <div className="bg-white p-4 rounded-xl shadow border">
-              <h2 className="text-xl font-semibold mb-3 text-gray-800">AI-Suggested Outfit</h2>
-              <pre className="whitespace-pre-wrap text-gray-700">{outfitSuggestion}</pre>
+            <div className="bg-white border p-5 rounded-xl shadow-sm">
+              <h2 className="text-xl font-semibold mb-2 text-gray-800">
+                Outfit Recommendation
+              </h2>
+              <div className="text-gray-700 whitespace-pre-line">
+                {outfitSuggestion}
+              </div>
             </div>
           )}
         </>
       )}
 
-      <UploadForm onUpload={handleUpload} />
-      <ClothesGallery key={refresh} />
+      {/* Upload Section */}
+      <div className="bg-white p-5 rounded-xl shadow-sm">
+        <UploadForm onUpload={handleUpload} />
+      </div>
+
+      {/* Clothes Gallery */}
+      <div className="bg-white p-5 rounded-xl shadow-sm">
+        <h2 className="text-xl font-semibold mb-3 text-gray-800">My Closet</h2>
+        <ClothesGallery key={refresh} />
+      </div>
     </div>
   );
 };

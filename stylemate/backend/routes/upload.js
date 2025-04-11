@@ -5,13 +5,21 @@ const router = express.Router();
 
 router.post('/upload-clothes', async (req, res) => {
   try {
-    const { imageUrl, type, color } = req.body;
+    const { imageUrl, type, color, season, occasion } = req.body;
 
-    if (!imageUrl || !type || !color) {
+    // Validation
+    if (!imageUrl || !type || !color || !season || !occasion) {
       return res.status(400).json({ error: 'Missing fields' });
     }
 
-    const newCloth = new Cloth({ imageUrl, type, color });
+    const newCloth = new Cloth({
+      imageUrl,
+      type,
+      color,
+      season,
+      occasion
+    });
+
     await newCloth.save();
 
     res.status(201).json({ message: 'Cloth uploaded successfully', cloth: newCloth });

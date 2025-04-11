@@ -2,31 +2,33 @@ import express from 'express';
 import connectDB from './db.js';
 import dotenv from 'dotenv';
 import uploadRoutes from './routes/upload.js';
-import clothesRoutes from './routes/clothes.js'; 
+import clothesRoutes from './routes/clothes.js';
+import deleteRoutes from './routes/delete.js';
 import cors from 'cors';
 import axios from 'axios';
 
 dotenv.config();
 const app = express();
 
-connectDB(); // MongoDB connection
+connectDB();
 app.use(cors());
 app.use(express.json());
 
 // Routes
 app.use('/api', uploadRoutes);
 app.use('/api/clothes', clothesRoutes);
+app.use('/api', deleteRoutes);
 
-// AI Suggestion Route (OpenRouter)
+// AI Suggestion Route (HuggingFace)
 app.post('/api/ai-outfit', async (req, res) => {
   const { weather, clothes } = req.body;
 
   const prompt = `
 You are a fashion assistant. Based on the weather:
-- Temperature: ${weather.temperature}°C
-- Condition: ${weather.condition}
+- Temperature: ${weather?.temperature ?? 'N/A'}°C
+- Condition: ${weather?.condition ?? 'N/A'}
 
-And this wardrobe: ${clothes.map(c => `${c.color} ${c.type}`).join(', ')}
+And this wardrobe: ${clothes?.map(c => `${c.color} ${c.type}`).join(', ') ?? 'No clothes'}
 
 Suggest a stylish outfit using only the clothes available. Output format:
 Top: ...
@@ -38,26 +40,24 @@ Shoes: ...
 
   try {
     const response = await axios.post(
-      'https://openrouter.ai/api/v1/chat/completions',
+      'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1',
       {
-        model: "openchat/openchat-3.5-1210", // free model
-        messages: [{ role: 'user', content: prompt }],
+        inputs: prompt,
+        parameters: { max_new_tokens: 200 },
       },
       {
         headers: {
-          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          'Authorization': `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': 'http://localhost:5173', // Or your frontend URL
-          'X-Title': 'StyleMate',
         },
       }
     );
 
-    const suggestion = response.data.choices[0].message.content;
+    const suggestion = response.data?.[0]?.generated_text?.split('Output format:')[1]?.trim() || "No suggestion received.";
     res.json({ suggestion });
   } catch (err) {
-    console.error('AI Suggestion Error:', err.message);
-    res.status(500).json({ error: 'AI Suggestion Failed' });
+    console.error('AI Suggestion Error:', err.response?.data || err.message);
+    res.status(500).json({ error: 'AI Suggestion Failed', details: err.response?.data || err.message });
   }
 });
 
@@ -67,3 +67,8 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
+
+
+
