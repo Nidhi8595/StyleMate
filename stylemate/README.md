@@ -32,11 +32,10 @@
   src/
   ├── components/
   │   ├── Header.jsx
-  │   └── OutfitCard.jsx
+  │   └── ClothesGallery.jsx
+  |   |__UploadForm.jsx 
   ├── pages/
   │   ├── Home.jsx
-  │   ├── Wardrobe.jsx
-  │   ├── Suggestions.jsx
   │   ├── Calendar.jsx
   │   └── Settings.jsx
   ├── App.jsx 
@@ -86,7 +85,9 @@
 ├── models/
 │   └── Cloth.js
 ├── routes/
-│   └── wardrobe.js
+│   └── clothes.js
+|   |__delete.js
+|   |__upload.js 
 ├── .env
 ├── server.js
  
@@ -109,7 +110,13 @@
    Create db.js to connect MongoDB
 
 ## Create Cloth Model
-   Create Upload Route
+  --imgeURL
+  --type
+  --color
+  --season
+  --occasion
+
+   ### Create Upload and delete Route
    Hook Route in server.js
 
 ## Connect Frontend UploadForm to Backend
@@ -134,3 +141,6 @@
  --Randomly generate a suggestion.
  
 ### Use OpenAI to suggest outfits
+
+## Clothes uploading and Deletion
+

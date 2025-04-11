@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import ClothesGallery from '../components/ClothesGallery';
 import UploadForm from '../components/UploadForm';
+import Header from '../components/Header';
 
 const Home = () => {
   const [weather, setWeather] = useState(null);
@@ -98,9 +99,9 @@ const Home = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+    <div className="max-w-4xl mx-auto px-1 pb-2 space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* <div className=" flex items-center justify-between">
         
         <h1 className="text-3xl font-semibold text-gray-800">StyleMate </h1>
         
@@ -110,8 +111,8 @@ const Home = () => {
         >
           👤
         </div>
-      </div>
-
+      </div> */}
+      <Header/>
       {/* Weather & Suggestion */}
       {loading ? (
         <div className="text-center text-gray-500">
@@ -169,8 +170,7 @@ const Home = () => {
       </div>
 
       {/* Clothes Gallery */}
-      <div className="bg-white p-5 rounded-xl shadow-sm">
-        <h2 className="text-xl font-semibold mb-3 text-gray-800">My Closet</h2>
+      <div className="wardrobe bg-white p-5 rounded-xl shadow-sm">
         <ClothesGallery key={refresh} />
       </div>
     </div>
